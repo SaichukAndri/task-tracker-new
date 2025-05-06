@@ -3,11 +3,16 @@
   "version": "1.0.0",
   "main": "backend/app.js",
   "scripts": {
-    "start": "node backend/app.js"
+    "start": "node backend/app.js",
+    "test": "jest"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "mongoose": "^7.0.3"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.1.0"
   }
 }
