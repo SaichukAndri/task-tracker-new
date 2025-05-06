@@ -1,38 +1,31 @@
-name: CI/CD
+name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main  # Тести будуть запускатись при пуші в main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main  # Тести будуть запускатись при створенні PR в main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest  # використовуємо останню версію Ubuntu
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3  # Клонуємо код з репозиторію
+
     - name: Set up Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v3  # Налаштовуємо Node.js
       with:
-        node-version: 18
+        node-version: '16'  # Вказуємо версію Node.js (можна змінити на потрібну)
 
     - name: Install dependencies
-      run: npm install
+      run: npm ci  # Інсталяція залежностей через npm ci для точного встановлення версій з package-lock.json
+
+    - name: Give execute permissions to jest
+      run: chmod +x node_modules/.bin/jest  # Даємо права на виконання для jest
 
     - name: Run tests
-      run: npm test
-
-    - name: Codacy Coverage Reporter
-      uses: codacy/codacy-coverage-reporter-action@v1
-      with:
-        project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        coverage-reports: coverage/lcov.info
-
-    - name: Cache node modules
-      uses: actions/cache@v3
-      with:
-        path: node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
+      run: npm test  # Запускаємо тести через npm test
