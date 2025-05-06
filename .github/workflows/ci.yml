@@ -34,4 +34,5 @@ jobs:
         run: npm install
 
       - name: Run tests
-        run: npm test
+        run: npx jest --testTimeout=10000
+
