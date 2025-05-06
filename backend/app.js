@@ -4,6 +4,12 @@ const { Task, mongoose } = require('./db');
 const tasksRouter = require('./routes/tasks');
 
 const app = express();
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb://127.0.0.1:27017/tasktracker', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 app.use(cors());
 app.use(express.json());

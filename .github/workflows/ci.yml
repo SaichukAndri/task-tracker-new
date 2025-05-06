@@ -1,31 +1,37 @@
-name: CI
+name: Run backend tests
 
 on:
   push:
     branches:
-      - main  # Тести будуть запускатись при пуші в main
+      - main
   pull_request:
-    branches:
-      - main  # Тести будуть запускатись при створенні PR в main
 
 jobs:
   test:
-    runs-on: ubuntu-latest  # використовуємо останню версію Ubuntu
+    runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo:6
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.stats()'" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3  # Клонуємо код з репозиторію
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3  # Налаштовуємо Node.js
-      with:
-        node-version: '16'  # Вказуємо версію Node.js (можна змінити на потрібну)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-    - name: Install dependencies
-      run: npm ci  # Інсталяція залежностей через npm ci для точного встановлення версій з package-lock.json
+      - name: Install dependencies
+        run: npm install
 
-    - name: Give execute permissions to jest
-      run: chmod +x node_modules/.bin/jest  # Даємо права на виконання для jest
-
-    - name: Run tests
-      run: npm test  # Запускаємо тести через npm test
+      - name: Run tests
+        run: npm test
