@@ -33,6 +33,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run tests
-        run: npx jest --testTimeout=10000
+      - name: Fix jest permissions
+        run: chmod +x ./node_modules/.bin/jest
 
+      - name: Run tests
+        run: ./node_modules/.bin/jest --testTimeout=10000
