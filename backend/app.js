@@ -1,15 +1,20 @@
 const express = require('express');
 const cors = require('cors');
-const { Task, mongoose } = require('./db');
+const { Task } = require('./db');  // Потрібно імпортувати тільки Task, не mongoose
 const tasksRouter = require('./routes/tasks');
 
 const app = express();
+
+// Підключення mongoose
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://127.0.0.1:27017/tasktracker', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+// Перевірка активного з'єднання
+if (mongoose.connection.readyState === 0) {
+  mongoose.connect('mongodb://127.0.0.1:27017/tasktracker', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+}
 
 app.use(cors());
 app.use(express.json());

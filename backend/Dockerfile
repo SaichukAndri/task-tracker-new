@@ -2,12 +2,15 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+# Копіювання лише package.json з батьківської директорії
+COPY ../package*.json ./
 
+# Встановлення залежностей
 RUN npm install
 
-COPY backend/ ./backend/
+# Копіювання всього коду з папки backend
+COPY ./backend/ .
 
 EXPOSE 3000
 
-CMD ["node", "backend/app.js"]
+CMD ["node", "app.js"]

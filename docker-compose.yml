@@ -13,7 +13,7 @@ services:
 
   backend:
     build:
-      context: .
+      context: ./
       dockerfile: backend/Dockerfile
     container_name: task-tracker-backend
     restart: unless-stopped
@@ -47,7 +47,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./frontend:/usr/share/nginx/html
+      - /d/task-tracker/frontend:/usr/share/nginx/html:rw
     depends_on:
       - backend
     networks:
