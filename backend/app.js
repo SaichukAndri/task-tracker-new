@@ -1,37 +1,50 @@
 const express = require('express');
 const cors = require('cors');
-const { Task } = require('./db');  // Потрібно імпортувати тільки Task, не mongoose
+const mongoose = require('mongoose');
+const { Task } = require('./db');
 const tasksRouter = require('./routes/tasks');
+const metrics = require('./metrics');
 
 const app = express();
 
-// Підключення mongoose
-const mongoose = require('mongoose');
-
-// Перевірка активного з'єднання
+// Підключення до MongoDB, якщо з'єднання неактивне
 if (mongoose.connection.readyState === 0) {
-  mongoose.connect('mongodb://127.0.0.1:27017/tasktracker', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  mongoose.connect(
+    process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/tasktracker',
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  );
 }
 
+// Middleware
 app.use(cors());
 app.use(express.json());
+app.use(metrics.metricsMiddleware);
+
+// Роут для метрик Prometheus
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', metrics.register.contentType);
+  res.end(await metrics.register.metrics());
+});
+
+// Основний API роут
 app.use('/api/tasks', tasksRouter);
 
-const PORT = 3000;
+// Запуск сервера
+const PORT = process.env.PORT || 3000;
 
 if (require.main === module) {
   mongoose.connection.once('open', () => {
-    console.log('🟢 MongoDB з’єднання відкрите. Запускаємо сервер...');
+    console.log('🟢 MongoDB з\'єднання відкрите. Запускаємо сервер...');
     app.listen(PORT, () => {
       console.log(`🚀 Сервер працює на порту ${PORT}`);
     });
   });
 
   mongoose.connection.on('error', (err) => {
-    console.error('❌ MongoDB помилка з’єднання:', err.message);
+    console.error('❌ MongoDB помилка з\'єднання:', err.message);
   });
 }
 

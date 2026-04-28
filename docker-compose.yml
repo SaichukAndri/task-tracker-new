@@ -41,13 +41,14 @@ services:
       - app-network
 
   frontend:
-    image: nginx:alpine
+    build:
+      context: ./
+      dockerfile: frontend/Dockerfile
+    image: task-tracker-frontend
     container_name: task-tracker-frontend
     restart: unless-stopped
     ports:
-      - "80:80"
-    volumes:
-      - /d/task-tracker/frontend:/usr/share/nginx/html:rw
+      - "8080:80"
     depends_on:
       - backend
     networks:

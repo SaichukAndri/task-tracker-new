@@ -11,6 +11,10 @@ spec:
     metadata:
       labels:
         app: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "3000"
     spec:
       containers:
       - name: backend
@@ -18,15 +22,31 @@ spec:
         imagePullPolicy: Never
         ports:
         - containerPort: 3000
+          name: metrics
         env:
         - name: MONGO_URI
           value: "mongodb://mongo-service:27017/tasktracker"
-
-
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: metrics
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: backend-service
+  labels:
+    app: backend
+    prometheus-scrape: "true"
 spec:
   selector:
     app: backend
@@ -34,4 +54,5 @@ spec:
     - protocol: TCP
       port: 3000
       targetPort: 3000
+      name: metrics
   type: ClusterIP

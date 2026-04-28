@@ -2,14 +2,14 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Копіювання лише package.json з батьківської директорії
-COPY ../package*.json ./
+# Копіювання package.json з кореня проєкту (build context = корінь)
+COPY package*.json ./
 
 # Встановлення залежностей
 RUN npm install
 
-# Копіювання всього коду з папки backend
-COPY ./backend/ .
+# Копіювання коду backend
+COPY backend/ .
 
 EXPOSE 3000
 
