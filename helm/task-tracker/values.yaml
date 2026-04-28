@@ -1,0 +1,16 @@
+replicaCount: 2
+
+backend:
+  image: task-tracker-backend
+  tag: latest
+  pullPolicy: Never
+  port: 3000
+
+frontend:
+  image: task-tracker-frontend
+  tag: latest
+  pullPolicy: Never
+  port: 80
+
+mongodb:
+  uri: mongodb://task-tracker-mongodb:27017/tasktracker
