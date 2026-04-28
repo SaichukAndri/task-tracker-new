@@ -1,18 +1,13 @@
 const request = require('supertest');
 const express = require('express');
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
+const { Task, mongoose } = require('../db');
 
 const app = express();
 app.use(bodyParser.json());
 app.use('/api/tasks', require('../routes/tasks'));
 
-beforeAll(async () => {
-  await mongoose.connect('mongodb://127.0.0.1:27017/tasktracker_test');
-});
-
 beforeEach(async () => {
-  const { Task } = require('../db');
   await Task.deleteMany();
 });
 
