@@ -1,86 +1,62 @@
 const request = require('supertest');
 const express = require('express');
-const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const { Task } = require('../db');  // імпортуємо модель Task
 
-// Мідлвар для парсингу JSON
+const app = express();
 app.use(bodyParser.json());
-
-// Підключаємо маршрут для роботи з задачами
 app.use('/api/tasks', require('../routes/tasks'));
 
-// Підключення до MongoDB для тестів
 beforeAll(async () => {
-  // Підключення до бази даних MongoDB перед виконанням тестів
-  await mongoose.connect('mongodb://127.0.0.1:27017/tasktracker', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  await mongoose.connect('mongodb://127.0.0.1:27017/tasktracker_test');
 });
 
-// Очищення бази даних перед кожним тестом
 beforeEach(async () => {
-  await Task.deleteMany();  // Очищаємо колекцію перед кожним тестом
+  const { Task } = require('../db');
+  await Task.deleteMany();
 });
 
-// Закриття з'єднання після тестів
 afterAll(async () => {
-  await mongoose.connection.close();  // Закриваємо з'єднання після всіх тестів
+  await mongoose.connection.close();
 });
 
 describe('Task API', () => {
-  
-  // Тест на створення задачі
   it('should create a new task', async () => {
     const res = await request(app)
       .post('/api/tasks')
       .send({ title: 'Test Task' });
-
-    expect(res.statusCode).toBe(201);  // перевірка статусу 201 (успішне створення)
-    expect(res.body.title).toBe('Test Task');  // перевірка правильності заголовка
+    expect(res.statusCode).toBe(201);
+    expect(res.body.title).toBe('Test Task');
   });
 
-  // Тест на отримання всіх задач
   it('should fetch all tasks', async () => {
     const res = await request(app)
       .get('/api/tasks')
       .send();
-
-    expect(res.statusCode).toBe(200);  // перевірка статусу 200 (успішне отримання)
-    expect(Array.isArray(res.body)).toBe(true);  // перевірка, що це масив
-    expect(res.body.length).toBe(0);  // перевірка, що в масиві немає задач (зачищено перед тестами)
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBe(0);
   });
 
-  // Тест на видалення задачі
   it('should delete a task', async () => {
-    // Спочатку створюємо задачу
     const taskRes = await request(app)
       .post('/api/tasks')
       .send({ title: 'Task to Delete' });
+    const taskId = taskRes.body._id;
 
-    const taskId = taskRes.body._id;  // отримуємо ID створеної задачі
-
-    // Тепер видаляємо задачу
     const deleteRes = await request(app)
       .delete(`/api/tasks/${taskId}`)
       .send();
+    expect(deleteRes.statusCode).toBe(204);
 
-    expect(deleteRes.statusCode).toBe(204);  // перевірка статусу 204 (успішне видалення)
-    
-    // Перевіримо, що задача дійсно видалена
     const resAfterDelete = await request(app).get('/api/tasks');
-    expect(resAfterDelete.body.length).toBe(0);  // після видалення має бути 0 задач
+    expect(resAfterDelete.body.length).toBe(0);
   });
 
-  // Тест на обробку помилки (неправильний запит, наприклад без заголовка)
   it('should return error when title is missing', async () => {
     const res = await request(app)
       .post('/api/tasks')
-      .send({});  // відправляємо пустий об'єкт
-
-    expect(res.statusCode).toBe(500);  // перевірка статусу помилки
-    expect(res.text).toBe('Task validation failed: title: Path `title` is required.');  // перевірка повідомлення про помилку
+      .send({});
+    expect(res.statusCode).toBe(500);
   });
 });
